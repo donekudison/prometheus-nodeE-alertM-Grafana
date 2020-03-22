@@ -1,0 +1,39 @@
+---
+# This playbook configure and deploy prometheus, node_exporter, 
+# alertmanager an grafana on centos 7 server.
+
+- hosts: node-server
+  become_user: root
+  become: yes
+  gather_facts: true
+
+  #pre_tasks:
+   # - name: Update yum cache.
+    #  yum: 
+    #    name: yum 
+    #    update_cache: yes 
+    #    state: latest
+
+  roles:
+    - node-exporter
+   
+    
+- hosts: prometheus
+  become_user: root
+  become: yes
+  gather_facts: true
+
+
+  roles:
+    - prometheus
+    - alertmanager
+    
+    
+- hosts: grafana-server
+  become_user: root
+  become: yes
+  gather_facts: true
+
+
+  roles:
+    - grafana

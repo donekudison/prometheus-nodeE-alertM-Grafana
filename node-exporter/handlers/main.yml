@@ -1,0 +1,12 @@
+---
+- name: restart node_exporter
+  service:
+    name: node_exporter
+    state: restarted
+    enabled: yes
+
+- name: Restart iptables service
+  service:
+    name: iptables
+    state: restarted
+    enabled: yes

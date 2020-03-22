@@ -1,0 +1,59 @@
+#Alert Manager requester
+---
+groups:
+ - name: High CPU Load
+   rules:
+   - alert: HighCpuLoad
+     annotations:
+     description: |-
+        CPU load is > 80%
+          VALUE = {{ $value }}
+          LABELS: {{ $labels }}
+     summary: "High CPU load (instance {{ $labels.instance }})"
+     expr: "100 - (avg by(instance) (irate(node_cpu_seconds_total{mode=\"idle\"}[5m])) * 100) > 80"
+     for: 5m
+     labels:
+      severity: warning
+
+ - name: Network ThroughputOut
+   rules:
+   - alert: UnusualNetworkThroughputOut
+     annotations:
+     description: |-
+        Host network interfaces are probably sending too much data (> 100 MB/s)
+          VALUE = {{ $value }}
+          LABELS: {{ $labels }}
+     summary: "Unusual network throughput out (instance {{ $labels.instance }})"
+     expr: "sum by (instance) (irate(node_network_transmit_bytes_total[2m])) / 1024 / 1024 > 100"
+     for: 5m
+     labels:
+      severity: warning
+
+ - name: Out of Memory
+   rules:
+   - alert: OutOfMemory
+     annotations:
+     description: |-
+        Node memory is filling up (< 10% left)
+          VALUE = {{ $value }}
+          LABELS: {{ $labels }}
+     summary: "Out of memory (instance {{ $labels.instance }})"
+     expr: "node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes * 100 < 10"
+     for: 5m
+     labels:
+       severity: warning
+
+ - name: Host_Server
+   rules:
+   - alert: ExporterDown
+     annotations:
+     description: |-
+        We have received host down alert for the server:
+          VALUE = {{ $node }}
+          LABELS: {{ $labels }}
+     summary: "System Host Down (instance {{ $labels.instance }})"
+     expr: "up == 0"
+     for: 5m
+     labels:
+      severity: warning
+[

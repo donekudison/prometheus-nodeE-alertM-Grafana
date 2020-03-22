@@ -1,0 +1,28 @@
+---
+- name: Copying grafana systemd files
+  copy:
+    src: grafana.repo
+    dest: /etc/yum.repos.d
+    owner: root
+    group: root
+
+- name: Install grafana package
+  yum:
+    name: grafana
+    state: installed
+    
+
+- name: Start grafana-server service
+  systemd:
+    daemon-reload: true
+    name: grafana-server.service
+    state: restarted
+    enabled: yes
+    
+- name: Opening grafana port 3000
+  lineinfile:
+    dest: /etc/sysconfig/iptables
+    insertbefore: "-A INPUT -j REJECT --reject-with icmp-host-prohibited"
+    line: "-A INPUT -p tcp -m state --state NEW -m tcp --dport 3000 -j ACCEPT"
+  notify: restart_iptables
+ 

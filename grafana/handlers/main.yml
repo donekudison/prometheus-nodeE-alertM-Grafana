@@ -1,0 +1,10 @@
+---
+- name: restart grafana server
+  service:
+    name: grafana-server
+    state: restarted
+
+- name: Restart iptables
+  service:
+    name: iptables
+    state: restarted

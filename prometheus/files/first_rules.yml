@@ -1,0 +1,7 @@
+#Rule Example
+groups:
+ - name: Host_Server
+   rules:
+   - alert: InstanceDown
+     expr: up == 0
+     for: 10s

@@ -1,0 +1,77 @@
+---
+- name: Install htop package
+  yum:
+    name: htop
+    state: installed
+
+- name: Install finger package
+  yum:
+    name: finger
+    state: installed
+    
+- name: Install iptables package
+  yum:
+    name: iptables-services
+    state: latest
+
+- name: Add the user and group 'nodeuser' 
+  user:
+    name: nodeuser
+    shell: /bin/false
+    
+- name: Create node exporter library directory
+  file: 
+    path: /var/lib/node_exporter
+    state: directory
+    mode: 0755
+    owner: nodeuser
+    group: nodeuser
+    
+
+- name: Extract node_exporter tar files
+  unarchive: src=node_exporter-0.18.1.linux-amd64.tar
+             dest=/opt
+             owner=root
+             group=root
+             
+- name: Moving all node_exporter custom files
+  copy: 
+    src: /opt/node_exporter-0.18.1.linux-amd64/node_exporter
+    dest: /usr/local/bin
+    owner: nodeuser
+    group: nodeuser
+    mode: 0755
+    
+- name: Removing node_exporter tar directory
+  file:
+    path: /opt/node_exporter-0.18.1.linux-amd64/
+    state: absent
+    
+- name: Creating a softlink for node exporter file
+  file:
+    src: /usr/local/bin
+    dest: /opt/node_exporter
+    state: link
+    
+
+- name: Copying node_exporter systemd files
+  copy:
+    src: node_exporter.service
+    dest: /etc/systemd/system
+    owner: root
+    group: root
+
+- name: Start node_exporter systemd service
+  systemd:
+    daemon-reload: true
+    name: node_exporter.service
+    state: restarted
+    enabled: yes
+    
+- name: Opening node_exporter port 9100
+  lineinfile:
+    dest: /etc/sysconfig/iptables
+    insertbefore: "-A INPUT -j REJECT --reject-with icmp-host-prohibited"
+    line: "-A INPUT -p tcp -m state --state NEW -m tcp --dport 9100 -j ACCEPT"
+  #notify: restart_iptables
+ 
