@@ -1,0 +1,88 @@
+---
+- name: Install htop package
+  yum:
+    name: htop
+    state: installed
+
+- name: Add the user and group 'prometheus' 
+  user:
+    name: prometheus
+    shell: /bin/false
+    
+- name: Create prometheus library directory
+  file: 
+    path: /var/lib/prometheus
+    state: directory
+    mode: 0755
+    owner: prometheus
+    group: prometheus
+    
+- name: Creating /opt/prometheus folder
+  file:
+    state: directory
+    path: /opt/prometheus
+    owner: prometheus
+    group: prometheus
+    mode: 0755
+
+- name: Extract prometheus tar files
+  unarchive: src=prometheus-2.13.0.linux-amd64.tar
+             dest=/opt
+             owner=root
+             group=root
+             
+- name: Moving all prometheus custom files
+  copy: 
+    src: /opt/prometheus-2.13.0.linux-amd64
+    dest: /opt/prometheus
+    owner: prometheus
+    group: prometheus
+    
+- name: Removing prometheus tar directory
+  file:
+    path: /opt/prometheus-2.13.0.linux-amd64/
+    state: absent
+    
+- name: Move prometheus execution file
+  copy: 
+    src: /opt/prometheus/prometheus
+    dest: /usr/local/bin
+    owner: prometheus
+    group: prometheus
+
+- name: Move promtool execution file
+  copy: 
+    src: /opt/prometheus/promtool
+    dest: /usr/local/bin
+    owner: prometheus
+    group: prometheus
+    
+- name: Replace prometheus config file
+  copy:
+    src: prometheus.yml
+    dest: /opt/prometheus
+    owner: prometheus
+    group: prometheus
+    
+
+- name: Copying prometheus systemd files
+  copy:
+    src: prometheus.service
+    dest: /etc/systemd/system
+    owner: root
+    group: root
+
+- name: Start prometheus systemd service
+  systemd:
+    daemon-reload: true
+    name: prometheus.service
+    state: restarted
+    enabled: yes
+    
+- name: Opening prometheus port 9090
+  lineinfile:
+    dest: /etc/sysconfig/iptables
+    insertbefore: "-A INPUT -j REJECT --reject-with icmp-host-prohibited"
+    line: "-A INPUT -p tcp -m state --state NEW -m tcp --dport 9090 -j ACCEPT"
+  notify: restart_iptables
+ 

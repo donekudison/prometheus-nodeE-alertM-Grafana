@@ -1,0 +1,7 @@
+---
+# Handler for prometheus service
+- name: restart prometheus service
+  service:
+    name: prometheus
+    state: restarted
+    enable: yes
