@@ -1,6 +1,8 @@
 
 ## Standalone [Prometheus](https://prometheus.io/docs/introduction/overview/) monitoring and alert toolkit
 
+Please download prometheus-2.16.0.linux-amd64.tar.gz and place it into file folder on your server before running this playbook.
+Unable to upload the tarball  due to file size.
 
 ## Ansible Requirements
 
